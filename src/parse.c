@@ -4,10 +4,6 @@
 
 #include "parse.h"
 
-#define addChar(s, c)\
-    s = realloc((s), (strlen((s)) + 2)*sizeof(char));\
-    strcat(s, (char[]){(c), 0})\
-
 static void advance(Parser* parser) {
     ++parser->pos;
     parser->current = parser->code[parser->pos];
@@ -154,8 +150,9 @@ OperationList* parse(const char* code) {
                     printf("\nUnclosed \'{\'\n");
                     exit(1);
                 }
-                
-                addChar(body, parser->current);
+
+                body = realloc(body, (strlen(body) + 2)*sizeof(char));
+                strcat(body, (char[]){parser->current, 0});
 
                 advance(parser);
             }
@@ -165,6 +162,8 @@ OperationList* parse(const char* code) {
 
             Operation op = { CREATEOBJ, objectInfo };
             addOperation(result, op);
+
+            free(body);
         }
         else if (parser->current == '!') {
             Operation op = { RETURN };

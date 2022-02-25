@@ -4,10 +4,6 @@
 
 #include "file.h"
 
-#define addChar(s, c)\
-    s = realloc((s), (strlen((s)) + 2)*sizeof(char));\
-    strcat(s, (char[]){(c), 0})\
-
 char* open(const char* file) {
     FILE* fp = fopen(file, "r");
 
@@ -16,7 +12,8 @@ char* open(const char* file) {
 
     if (fp != NULL) {
         while ((current = fgetc(fp)) != EOF) {
-            addChar(code, current);
+            code = realloc(code, (strlen(code) + 2)*sizeof(char));
+            strcat(code, (char[]){current, 0});
         }
     } 
     else {

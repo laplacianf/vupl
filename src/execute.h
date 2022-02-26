@@ -1,15 +1,21 @@
 #ifndef __EXECUTE_H__
 #define __EXECUTE_H__
 
-
 typedef union Object {
     OperationList* body;
 } Object;
 
 
+typedef struct Runnable {
+    OperationList* body;
+    struct TValue* variables;
+} Runnable;
+
+
 typedef union Value {
     int i;
-    Object o;
+    Object* o;
+    Runnable* r;
 } Value;
 
 
@@ -32,6 +38,7 @@ typedef struct Stack {
     int last;
 } Stack;
 
-void execute(OperationList* oplist);
+TValue execute(Runnable* runnable, int type);
+void executeMain(const char* code);
 
 #endif

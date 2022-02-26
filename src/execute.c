@@ -4,6 +4,9 @@
 #include "parse.h"
 #include "execute.h"
 
+#define EXECUTEFUNCTION 0
+#define EXECUTEOBJECT 1
+
 static TValue zero() {
     Value value;
     value.i = 0;
@@ -78,14 +81,14 @@ static TValue sub(TValue tvalue) {
     }
 }
 
-void execute(OperationList* oplist) {
+TValue execute(Runnable* runnable, int type) {
+    OperationList* oplist = runnable->body;
+
     Stack* stack = malloc(sizeof(Stack));
     //initiallize stack
     stack->list = malloc(sizeof(TValue));
     stack->size = 1;
     stack->last = -1;
-
-    TValue variables[256] = { zero() }; 
 
     int pos = 0;
 
@@ -99,7 +102,7 @@ void execute(OperationList* oplist) {
             int var = toInt(pop(stack));
             
             if (var >= 0 && var <= 255) {
-                push(stack, variables[var]);
+                push(stack, runnable->variables[var]);
             } 
             else {
                 //raise error
@@ -109,7 +112,7 @@ void execute(OperationList* oplist) {
             int var = toInt(pop(stack));
 
             if (var >= 0 && var <= 255) {
-                variables[var] = pop(stack);
+                runnable->variables[var] = pop(stack);
             }
             else {
                 //raise error
@@ -137,12 +140,53 @@ void execute(OperationList* oplist) {
             pos = loop - 1;
         }
         else if (op.type == CREATEOBJ) {
-            Object obj = { op.info.body };
+            Object* newObject = malloc(sizeof(Object));
+            //initiallize new object
+            newObject->body = malloc(sizeof(OperationList));
+            newObject->body = op.info.body;
             Value value;
-            value.o = obj;
+            value.o = newObject;
             TValue tvalue = { value, OBJECT };
 
             push(stack, tvalue);
+        }
+        else if (op.type == RETURN) {
+            if (type == EXECUTEFUNCTION) {
+                break;
+            }
+            else {
+                printf("\nReturn Outside Function\n");
+                exit(1);
+            }
+
+        }
+        else if (op.type == CALL) {
+            TValue function = pop(stack);
+            if (function.type == OBJECT) {
+                Runnable* newRunnable = malloc(sizeof(Runnable));
+                //initiallize new runnable
+                newRunnable->variables = malloc(sizeof(TValue) * 256);
+                newRunnable->body = malloc(sizeof(OperationList));
+
+                newRunnable->body = function.value.o->body;
+
+                Value value;
+                value.r = runnable;
+                TValue tvalue = { value, RUNNABLE };
+
+                newRunnable->variables[0] = tvalue; //set variable 0 of new runnable to this
+                
+                for (int i = 0; i <= stack->last + 1; i++) {
+                    newRunnable->variables[i + 1] = pop(stack);
+                }
+
+                push(stack, execute(newRunnable, EXECUTEFUNCTION));
+                
+                free(newRunnable);
+            }
+            else {
+                //raise error
+            }
         }
         else if (op.type == PRINT) {
             int val = toInt(pop(stack));
@@ -158,18 +202,43 @@ void execute(OperationList* oplist) {
 
         ++pos;
     }
-
+    
+    /*
     printf("\n");
 
     for (int j = 0; j <= 32; j++) {
-        if (variables[j].type == OBJECT) {
+        if (runnable->variables[j].type == OBJECT) {
             printf("object\n");
         }
         else {
-            printf("%d| %d\n", j, variables[j].value.i);
+            printf("%d| %d\n", j, runnable->variables[j].value.i);
         }
     }
+    */
+
+    TValue ret = pop(stack);
     
     free(stack);
     free(oplist);
+
+    return ret;
 }
+
+void executeMain(const char* code) {
+    OperationList* parseResult = parse(code);
+
+    Runnable* main = malloc(sizeof(Runnable));
+    //initiallize main runnable
+    main->variables = malloc(sizeof(TValue) * 256);
+    main->body = malloc(sizeof(OperationList));
+
+    main->body = parseResult;
+
+    for (int i = 0; i < 256; i++) {
+        main->variables[i] = zero();
+    }
+
+    execute(main, EXECUTEOBJECT);
+
+    free(main);
+} 

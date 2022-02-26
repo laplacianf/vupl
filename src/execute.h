@@ -1,9 +1,9 @@
 #ifndef __EXECUTE_H__
 #define __EXECUTE_H__
 
-typedef union Object {
+typedef union Template {
     OperationList* body;
-} Object;
+} Template;
 
 
 typedef struct Runnable {
@@ -14,14 +14,14 @@ typedef struct Runnable {
 
 typedef union Value {
     int i;
-    Object* o;
+    Template* t;
     Runnable* r;
 } Value;
 
 
 typedef enum ValueType {
     INT = 0,
-    OBJECT,
+    TEMPLATE,
     RUNNABLE 
 } ValueType;
 

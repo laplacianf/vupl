@@ -139,14 +139,14 @@ TValue execute(Runnable* runnable, int type) {
 
             pos = loop - 1;
         }
-        else if (op.type == CREATEOBJ) {
-            Object* newObject = malloc(sizeof(Object));
-            //initiallize new object
-            newObject->body = malloc(sizeof(OperationList));
-            newObject->body = op.info.body;
+        else if (op.type == CREATETEMPLATE) {
+            Template* newTemplate = malloc(sizeof(Template));
+            //initiallize new template
+            newTemplate->body = malloc(sizeof(OperationList));
+            newTemplate->body = op.info.body;
             Value value;
-            value.o = newObject;
-            TValue tvalue = { value, OBJECT };
+            value.t = newTemplate;
+            TValue tvalue = { value, TEMPLATE };
 
             push(stack, tvalue);
         }
@@ -162,13 +162,13 @@ TValue execute(Runnable* runnable, int type) {
         }
         else if (op.type == CALL) {
             TValue function = pop(stack);
-            if (function.type == OBJECT) {
+            if (function.type == TEMPLATE) {
                 Runnable* newRunnable = malloc(sizeof(Runnable));
                 //initiallize new runnable
                 newRunnable->variables = malloc(sizeof(TValue) * 256);
                 newRunnable->body = malloc(sizeof(OperationList));
 
-                newRunnable->body = function.value.o->body;
+                newRunnable->body = function.value.t->body;
 
                 Value value;
                 value.r = runnable;
@@ -207,8 +207,8 @@ TValue execute(Runnable* runnable, int type) {
     printf("\n");
 
     for (int j = 0; j <= 32; j++) {
-        if (runnable->variables[j].type == OBJECT) {
-            printf("object\n");
+        if (runnable->variables[j].type == TEMPLATE) {
+            printf("template\n");
         }
         else {
             printf("%d| %d\n", j, runnable->variables[j].value.i);

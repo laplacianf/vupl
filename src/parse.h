@@ -13,11 +13,12 @@
 08 END → }
 09 RETURN → !
 10 CALL → |
-11 CREATEOBJ → ,
-12 ATTR → .
-13 PRINT → ?
-14 PRINTC → ~
-15 ENDFILE 
+11 CREATETEMPLATE
+12 CREATEOBJ → ,
+13 ATTR → .
+14 PRINT → ?
+15 PRINTC → ~
+16 ENDFILE 
 */
 typedef enum OperationType {
     PUSH = 0, 
@@ -31,6 +32,7 @@ typedef enum OperationType {
     END,
     RETURN,
     CALL,
+    CREATETEMPLATE,
     CREATEOBJ,
     ATTR,
     PRINT,
@@ -41,7 +43,7 @@ typedef enum OperationType {
 
 typedef union OperationInfo {
     int pos; //stores information about jump position
-    struct OperationList* body; //stores information about objects body
+    struct OperationList* body; //stores information about body
 } OperationInfo;
 
 

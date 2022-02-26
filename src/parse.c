@@ -157,10 +157,10 @@ OperationList* parse(const char* code) {
                 advance(parser);
             }
 
-            OperationInfo objectInfo;
-            objectInfo.body = parse(body);
+            OperationInfo templateInfo;
+            templateInfo.body = parse(body);
 
-            Operation op = { CREATEOBJ, objectInfo };
+            Operation op = { CREATETEMPLATE, templateInfo };
             addOperation(result, op);
 
             free(body);

@@ -173,12 +173,16 @@ OperationList* parse(const char* code) {
             Operation op = { CALL };
             addOperation(result, op);
         }
-        else if (parser->current == ',') {
+        else if (parser->current == ';') {
             Operation op = { CREATEOBJ };
             addOperation(result, op);
         }
         else if (parser->current == '.') {
-            Operation op = { ATTR };
+            Operation op = { GETATTR };
+            addOperation(result, op);
+        }
+        else if (parser->current == ',') {
+            Operation op = { SETATTR };
             addOperation(result, op);
         }
         else if (parser->current == '?') {

@@ -161,20 +161,20 @@ TValue execute(Runnable* runnable, int type) {
 
         }
         else if (op.type == CALL) {
-            TValue function = pop(stack);
-            if (function.type == TEMPLATE) {
+            TValue template = pop(stack);
+            if (template.type == TEMPLATE) {
                 Runnable* newRunnable = malloc(sizeof(Runnable));
                 //initiallize new runnable
                 newRunnable->variables = malloc(sizeof(TValue) * 256);
                 newRunnable->body = malloc(sizeof(OperationList));
 
-                newRunnable->body = function.value.t->body;
+                newRunnable->body = template.value.t->body;
 
-                Value value;
-                value.r = runnable;
-                TValue tvalue = { value, RUNNABLE };
+                for (int i = 0; i < 256; i++) {
+                    newRunnable->variables[i] = zero();
+                }
 
-                newRunnable->variables[0] = tvalue; //set variable 0 of new runnable to this
+                newRunnable->variables[0] = runnable->variables[0]; //set variable 0 to previous scope's variable 0
                 
                 for (int i = 0; i <= stack->last + 1; i++) {
                     newRunnable->variables[i + 1] = pop(stack);
@@ -183,6 +183,74 @@ TValue execute(Runnable* runnable, int type) {
                 push(stack, execute(newRunnable, EXECUTEFUNCTION));
                 
                 free(newRunnable);
+            }
+            else {
+                //raise error
+            }
+        }
+        else if (op.type == CREATEOBJ) {
+            TValue template = pop(stack);
+            if (template.type == TEMPLATE) {
+                Runnable* newRunnable = malloc(sizeof(Runnable));
+                //initiallize new runnable
+                newRunnable->variables = malloc(sizeof(TValue) * 256);
+                newRunnable->body = malloc(sizeof(OperationList));
+
+                newRunnable->body = template.value.t->body;
+
+                Value value;
+                value.r = runnable;
+                TValue tvalue = { value, RUNNABLE };
+
+                for (int i = 0; i < 256; i++) {
+                    newRunnable->variables[i] = zero();
+                }
+
+                newRunnable->variables[0] = tvalue; //set variable 0 of new runnable to this
+                
+                for (int i = 0; i <= stack->last + 1; i++) {
+                    newRunnable->variables[i + 1] = pop(stack);
+                }
+
+                execute(newRunnable, EXECUTEOBJECT);
+
+                Value newValue;
+                newValue.r = newRunnable;
+                TValue newTvalue = { newValue, RUNNABLE };
+                
+                push(stack, newTvalue);
+            } 
+            else {
+                //raise error
+            }
+        }
+        else if (op.type == GETATTR) {
+            TValue object = pop(stack);
+            int attr = toInt(pop(stack));
+
+            if (object.type == RUNNABLE) {
+                if (attr >= 0 && attr <= 255) {
+                    push(stack, object.value.r->variables[attr]);
+                }
+                else {
+                    //raise error
+                }
+            }
+            else {
+                //raise error
+            }
+        }
+        else if (op.type == SETATTR) {
+            TValue object = pop(stack);
+            int attr = toInt(pop(stack));
+
+            if (object.type == RUNNABLE) {
+                if (attr >= 0 && attr <= 255) {
+                    object.value.r->variables[attr] = pop(stack);
+                }
+                else {
+                    //raise error
+                }
             }
             else {
                 //raise error
@@ -203,19 +271,6 @@ TValue execute(Runnable* runnable, int type) {
         ++pos;
     }
     
-    /*
-    printf("\n");
-
-    for (int j = 0; j <= 32; j++) {
-        if (runnable->variables[j].type == TEMPLATE) {
-            printf("template\n");
-        }
-        else {
-            printf("%d| %d\n", j, runnable->variables[j].value.i);
-        }
-    }
-    */
-
     TValue ret = pop(stack);
     
     free(stack);
@@ -237,6 +292,13 @@ void executeMain(const char* code) {
     for (int i = 0; i < 256; i++) {
         main->variables[i] = zero();
     }
+
+    Value value;
+    value.r = main;
+
+    TValue tvalue = { value, RUNNABLE };
+
+    main->variables[0] = tvalue; //set variable 0 to this
 
     execute(main, EXECUTEOBJECT);
 

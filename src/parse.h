@@ -14,11 +14,12 @@
 09 RETURN → !
 10 CALL → |
 11 CREATETEMPLATE
-12 CREATEOBJ → ,
-13 ATTR → .
-14 PRINT → ?
-15 PRINTC → ~
-16 ENDFILE 
+12 CREATEOBJ → ;
+13 GETATTR → .
+14 SETATTR → ,
+15 PRINT → ?
+16 PRINTC → ~
+17 ENDFILE 
 */
 typedef enum OperationType {
     PUSH = 0, 
@@ -34,7 +35,8 @@ typedef enum OperationType {
     CALL,
     CREATETEMPLATE,
     CREATEOBJ,
-    ATTR,
+    GETATTR,
+    SETATTR,
     PRINT,
     PRINTC,
     ENDFILE

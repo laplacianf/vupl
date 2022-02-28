@@ -274,7 +274,6 @@ TValue execute(Runnable* runnable, int type) {
     TValue ret = pop(stack);
     
     free(stack);
-    free(oplist);
 
     return ret;
 }

@@ -1,7 +1,7 @@
 #ifndef __EXECUTE_H__
 #define __EXECUTE_H__
 
-typedef union Template {
+typedef struct Template {
     OperationList* body;
 } Template;
 

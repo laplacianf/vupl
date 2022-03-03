@@ -151,7 +151,7 @@ OperationList* parse(const char* code) {
                     exit(1);
                 }
 
-                body = realloc(body, (strlen(body) + 2)*sizeof(char));
+                body = realloc(body, (strlen(body) + 2) * sizeof(char));
                 strcat(body, (char[]){parser->current, 0});
 
                 advance(parser);

@@ -7,7 +7,7 @@
 int main() {
     char* code = open("test.txt");
 
-    executeMain(code);
+    executeCode(code);
 
     return 0;
 }

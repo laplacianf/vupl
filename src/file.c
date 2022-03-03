@@ -12,7 +12,7 @@ char* open(const char* file) {
 
     if (fp != NULL) {
         while ((current = fgetc(fp)) != EOF) {
-            code = realloc(code, (strlen(code) + 2)*sizeof(char));
+            code = realloc(code, (strlen(code) + 2) * sizeof(char));
             strcat(code, (char[]){current, 0});
         }
     } 

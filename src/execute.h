@@ -38,7 +38,6 @@ typedef struct Stack {
     int last;
 } Stack;
 
-TValue execute(Runnable* runnable, int type);
-void executeMain(const char* code);
+void executeCode(const char* code);
 
 #endif

@@ -4,8 +4,10 @@
 #include "parse.h"
 #include "execute.h"
 
-#define EXECUTEFUNCTION 0
-#define EXECUTEOBJECT 1
+#define VARIABLE_NUM 256
+
+#define EXECUTE_FUNCTION 0
+#define EXECUTE_OBJECT 1
 
 static TValue zero() {
     Value value;
@@ -81,7 +83,19 @@ static TValue sub(TValue tvalue) {
     }
 }
 
-TValue execute(Runnable* runnable, int type) {
+static void initVariables(Runnable* runnable) {
+    for (int i = 0; i < VARIABLE_NUM; i++) {
+        runnable->variables[i] = zero();
+    }
+}
+
+static void initParam(Runnable* runnable, Stack* stack) {
+    for (int i = 0; i <= stack->last + 1; i++) {
+        runnable->variables[i + 1] = pop(stack);
+    }
+}
+
+static TValue execute(Runnable* runnable, int type) {
     OperationList* oplist = runnable->body;
 
     Stack* stack = malloc(sizeof(Stack));
@@ -101,7 +115,7 @@ TValue execute(Runnable* runnable, int type) {
         else if (op.type == LOAD) {
             int var = toInt(pop(stack));
             
-            if (var >= 0 && var <= 255) {
+            if (var >= 0 && var < VARIABLE_NUM) {
                 push(stack, runnable->variables[var]);
             } 
             else {
@@ -111,7 +125,7 @@ TValue execute(Runnable* runnable, int type) {
         else if (op.type == STORE) {
             int var = toInt(pop(stack));
 
-            if (var >= 0 && var <= 255) {
+            if (var >= 0 && var < VARIABLE_NUM) {
                 runnable->variables[var] = pop(stack);
             }
             else {
@@ -151,7 +165,7 @@ TValue execute(Runnable* runnable, int type) {
             push(stack, tvalue);
         }
         else if (op.type == RETURN) {
-            if (type == EXECUTEFUNCTION) {
+            if (type == EXECUTE_FUNCTION) {
                 break;
             }
             else {
@@ -170,17 +184,13 @@ TValue execute(Runnable* runnable, int type) {
 
                 newRunnable->body = template.value.t->body;
 
-                for (int i = 0; i < 256; i++) {
-                    newRunnable->variables[i] = zero();
-                }
+                initVariables(newRunnable);
 
                 newRunnable->variables[0] = runnable->variables[0]; //set variable 0 to previous scope's variable 0
                 
-                for (int i = 0; i <= stack->last + 1; i++) {
-                    newRunnable->variables[i + 1] = pop(stack);
-                }
+                initParam(newRunnable, stack);
 
-                push(stack, execute(newRunnable, EXECUTEFUNCTION));
+                push(stack, execute(newRunnable, EXECUTE_FUNCTION));
                 
                 free(newRunnable);
             }
@@ -202,17 +212,13 @@ TValue execute(Runnable* runnable, int type) {
                 value.r = runnable;
                 TValue tvalue = { value, RUNNABLE };
 
-                for (int i = 0; i < 256; i++) {
-                    newRunnable->variables[i] = zero();
-                }
+                initVariables(newRunnable);
 
                 newRunnable->variables[0] = tvalue; //set variable 0 of new runnable to this
                 
-                for (int i = 0; i <= stack->last + 1; i++) {
-                    newRunnable->variables[i + 1] = pop(stack);
-                }
+                initParam(newRunnable, stack);
 
-                execute(newRunnable, EXECUTEOBJECT);
+                execute(newRunnable, EXECUTE_OBJECT);
 
                 Value newValue;
                 newValue.r = newRunnable;
@@ -229,7 +235,7 @@ TValue execute(Runnable* runnable, int type) {
             int attr = toInt(pop(stack));
 
             if (object.type == RUNNABLE) {
-                if (attr >= 0 && attr <= 255) {
+                if (attr >= 0 && attr < VARIABLE_NUM) {
                     push(stack, object.value.r->variables[attr]);
                 }
                 else {
@@ -245,7 +251,7 @@ TValue execute(Runnable* runnable, int type) {
             int attr = toInt(pop(stack));
 
             if (object.type == RUNNABLE) {
-                if (attr >= 0 && attr <= 255) {
+                if (attr >= 0 && attr < VARIABLE_NUM) {
                     object.value.r->variables[attr] = pop(stack);
                 }
                 else {
@@ -278,7 +284,7 @@ TValue execute(Runnable* runnable, int type) {
     return ret;
 }
 
-void executeMain(const char* code) {
+void executeCode(const char* code) {
     OperationList* parseResult = parse(code);
 
     Runnable* main = malloc(sizeof(Runnable));
@@ -288,9 +294,7 @@ void executeMain(const char* code) {
 
     main->body = parseResult;
 
-    for (int i = 0; i < 256; i++) {
-        main->variables[i] = zero();
-    }
+    initVariables(main);
 
     Value value;
     value.r = main;
@@ -299,7 +303,7 @@ void executeMain(const char* code) {
 
     main->variables[0] = tvalue; //set variable 0 to this
 
-    execute(main, EXECUTEOBJECT);
+    execute(main, EXECUTE_OBJECT);
 
     free(main);
 } 

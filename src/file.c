@@ -17,7 +17,8 @@ char* open(const char* file) {
         }
     } 
     else {
-        //file do not exist
+        printf("\nFile %s Do Not Exist\n", file);
+        exit(1);
     }
 
     fclose(fp);

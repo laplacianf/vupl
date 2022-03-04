@@ -119,7 +119,8 @@ static TValue execute(Runnable* runnable, int type) {
                 push(stack, runnable->variables[var]);
             } 
             else {
-                //raise error
+                printf("\nVariable Index Must Be Between \'%d\' And \'%d\'\n", 0, VARIABLE_NUM - 1);
+                exit(1);
             }
         }
         else if (op.type == STORE) {
@@ -129,7 +130,8 @@ static TValue execute(Runnable* runnable, int type) {
                 runnable->variables[var] = pop(stack);
             }
             else {
-                //raise error
+                printf("\nVariable Index Must Be Between \'%d\' And \'%d\'\n", 0, VARIABLE_NUM - 1);
+                exit(1);
             }
         }
         else if (op.type == ADD) {
@@ -195,7 +197,8 @@ static TValue execute(Runnable* runnable, int type) {
                 free(newRunnable);
             }
             else {
-                //raise error
+                printf("\nMust Call A Template\n");
+                exit(1);
             }
         }
         else if (op.type == CREATEOBJ) {
@@ -227,7 +230,8 @@ static TValue execute(Runnable* runnable, int type) {
                 push(stack, newTvalue);
             } 
             else {
-                //raise error
+                printf("\nMust Create Object From A Template\n");
+                exit(1);
             }
         }
         else if (op.type == GETATTR) {
@@ -239,11 +243,13 @@ static TValue execute(Runnable* runnable, int type) {
                     push(stack, object.value.r->variables[attr]);
                 }
                 else {
-                    //raise error
+                    printf("\nAttribute Index Must Be Between \'%d\' And \'%d\'\n", 0, VARIABLE_NUM - 1);
+                    exit(1);
                 }
             }
             else {
-                //raise error
+                printf("\nMust Get Value From A Object\n");
+                exit(1);
             }
         }
         else if (op.type == SETATTR) {
@@ -255,11 +261,13 @@ static TValue execute(Runnable* runnable, int type) {
                     object.value.r->variables[attr] = pop(stack);
                 }
                 else {
-                    //raise error
+                    printf("\nAttribute Index Must Be Between \'%d\' And \'%d\'\n", 0, VARIABLE_NUM - 1);
+                    exit(1);
                 }
             }
             else {
-                //raise error
+                printf("\nMust Set Value From A Object\n");
+                exit(1);
             }
         }
         else if (op.type == PRINT) {
